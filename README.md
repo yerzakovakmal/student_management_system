@@ -25,32 +25,30 @@
 ```
 project/
 ├── src/
-│   ├── User.hpp / User.cpp             ← Akbarali
-│   ├── Student.hpp / Student.cpp       ← Malika (header + methods)
-│   ├── Professor.hpp / Professor.cpp   ← Akmal
-│   ├── TeachingAssistant.hpp / .cpp  
-│   ├── Admin.hpp / Admin.cpp           ← Akmal
-│   ├── Course.hpp / Course.cpp         ← Akbarali
-│   ├── Assignment.hpp / Assignment.cpp ← Rushana (header + methods)
-│   ├── Grade.hpp / Grade.cpp           ← Rushana
-│   ├── Exceptions.hpp                  ← Akmal
-│   └── main.cpp                        ← Akmal + Akbarali
+│   ├── User.h / User.cpp             
+│   ├── Student.h / Student.cpp       
+│   ├── Professor.h / Professor.cpp   
+│   ├── TeachingAssistant.h / .cpp  
+│   ├── Admin.h / Admin.cpp           
+│   ├── Course.h / Course.cpp         
+│   ├── Assignment.h / Assignment.cpp 
+│   ├── Grade.h / Grade.cpp           
+│   ├── Exceptions.h                  
+│   └── main.cpp                      
 ├── qt/
 │   ├── MainWindow.hpp / .cpp / .ui     ← Xondamir/Nodir
 │   ├── LoginDialog.hpp / .cpp / .ui    ← Xondamir/Nodir
 │   ├── AdminPanel.hpp / .cpp / .ui     ← Xondamir/Nodir
 │   ├── CourseManager.hpp / .cpp / .ui  ← Xondamir/Nodir
 │   ├── GradeEntry.hpp / .cpp / .ui     ← Xondamir/Nodir
-│   ├── StudentDashboard.hpp / .cpp / .ui ← Malika
-│   └── AssignmentViewer.hpp / .cpp / .ui ← Rushana
+│   ├── StudentDashboard.hpp / .cpp / .ui 
+│   └── AssignmentViewer.hpp / .cpp / .ui 
 ├── data/
 │   └── (saved .txt files from file I/O)
 └── README.md
 ```
 
 ---
-*(work in progress...)*
-
 # Team Task Board
 
 ---
@@ -63,8 +61,8 @@ project/
 | Akbarali | C++ Dev | Course, Assignment, Grade, Exceptions, File I/O |
 | Xondamir | Qt Lead | Main window, navigation, Admin panel, Course screens |
 | Nodir | Qt Dev | Login screen, Grade entry, Student dashboard |
-| Malika | C++ + Presenter | Student methods + presentation slides |
-| Rushana | C++ + Presenter | Grade & Assignment methods + presentation slides |
+| Malika | C++ + Presenter | presentation slides |
+| Rushana | C++ + Presenter | presentation slides |
 
 ---
 
@@ -95,7 +93,7 @@ static string generateId(const string& prefix) {
 
 ---
 
-## C++ Tasks — Akmal, Akbarali, Malika, Rushana
+## C++ Tasks
 
 > **Rule:** Every class gets its own `.hpp` and `.cpp` file.
 > No implementation inside `.hpp` except single-line getters.
@@ -104,7 +102,6 @@ static string generateId(const string& prefix) {
 ---
 
 ### TASK C-01 — `User` abstract base class
-**Assigned to:** Akbarali
 **Files:** `User.hpp`, `User.cpp`
 
 **What to include:**
@@ -123,7 +120,6 @@ static string generateId(const string& prefix) {
 ---
 
 ### TASK C-02 — `Professor` class
-**Assigned to:** Akmal
 **Files:** `Professor.hpp`, `Professor.cpp`
 
 **What to include:**
@@ -147,7 +143,6 @@ static string generateId(const string& prefix) {
 ---
 
 ### TASK C-03 — `TeachingAssistant` class (might not be included)
-**Assigned to:** Akmal
 **Files:** `TeachingAssistant.hpp`, `TeachingAssistant.cpp`
 
 **What to include:**
@@ -163,7 +158,6 @@ static string generateId(const string& prefix) {
 ---
 
 ### TASK C-04 — `Admin` class
-**Assigned to:** Akmal
 **Files:** `Admin.hpp`, `Admin.cpp`
 
 **What to include:**
@@ -186,7 +180,6 @@ static string generateId(const string& prefix) {
 ---
 
 ### TASK C-05 — `Student` class
-**Assigned to:** Malika
 **Files:** `Student.hpp`, `Student.cpp`
 
 In `Student.hpp`:**
@@ -217,7 +210,6 @@ Methods in `Student.cpp`:**
 ---
 
 ### TASK C-06 — `Course` class
-**Assigned to:** Akbarali
 **Files:** `Course.hpp`, `Course.cpp`
 
 **What to include:**
@@ -232,7 +224,6 @@ Methods in `Student.cpp`:**
 ---
 
 ### TASK C-07 — `Assignment` class
-**Assigned to:** Rushana
 **Files:** `Assignment.hpp`, `Assignment.cpp`
 
 Header + skeleton in Header file:**
@@ -258,7 +249,6 @@ Methods in `Assignment.cpp`:**
 ---
 
 ### TASK C-08 — `Grade` class
-**Assigned to:** Akbarali
 **Files:** `Grade.hpp`, `Grade.cpp`
 
 **What to include:**
@@ -288,7 +278,6 @@ Methods in `Assignment.cpp`:**
 ---
 
 ### TASK C-09 — Exception classes
-**Assigned to:** Akbarali
 **Files:** `Exceptions.hpp` (header only — no `.cpp` needed)
 
 **What to include:**
@@ -308,7 +297,6 @@ explicit CourseFullException(const string& msg)
 ---
 
 ### TASK C-10 — `main.cpp` integration demo
-**Assigned to:** Akmal + Akbarali (together, after all classes compile)
 **Files:** `main.cpp`
 
 **What to include:**
@@ -325,7 +313,7 @@ explicit CourseFullException(const string& msg)
 
 ---
 
-## Qt Tasks — Xondamir, Nodir, Malika, Rushana
+## Qt Tasks
 
 > Start Qt after C-01 through C-05 compile cleanly.
 > Qt is a wrapper — it calls your C++ methods, never reimplements the logic.
@@ -381,7 +369,6 @@ explicit CourseFullException(const string& msg)
 ---
 
 ### TASK Q-06 — Student dashboard
-**Assigned to:** Malika
 
 - `QTableWidget` displaying enrolled courses and grade for each
 - GPA label — calls `student.calculateGPA()` and displays result
@@ -397,7 +384,6 @@ explicit CourseFullException(const string& msg)
 ---
 
 ### TASK Q-07 — Assignment & Grade viewer
-**Assigned to:** Rushana
 
 - `QTableWidget` showing all assignments for a course: title, due date, max score
 - Sorted by due date (call `std::sort` on the vector using `operator<` you wrote)
@@ -457,15 +443,15 @@ explicit CourseFullException(const string& msg)
 ```
 Week 1 — Core C++:
   C-01 User → C-02 Professor → C-04 Admin
-  C-05 Student skeleton (Akmal) → C-05 Student methods (Malika starts)
+  C-05 Student skeleton (Akmal) → C-05 Student methods
   C-06 Course → C-09 Exceptions (Akbarali)
-  C-07 Assignment skeleton (Akbarali) → C-07 methods + C-08 Grade (Rushana starts)
+  C-07 Assignment skeleton (Akbarali) → C-07 methods + C-08 Grade
 
 Week 2 — Integration + Qt:
   C-03 TeachingAssistant → C-10 main.cpp (Akmal + Akbarali)
   Q-01 setup → Q-02 Login → Q-03/Q-04/Q-05 (Xondamir + Nodir)
-  Q-06 Student dashboard (Malika) → Q-07 Assignment viewer (Rushana)
-  P-01/P-02/P-03 Slides (Malika + Rushana, ongoing)
+  Q-06 Student dashboard (Malika) → Q-07 Assignment viewer
+  P-01/P-02/P-03 Slides
 ```
 
 ---
