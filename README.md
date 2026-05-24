@@ -61,8 +61,8 @@ project/
 | Akbarali | C++ Dev | Course, Assignment, Grade, Exceptions, File I/O |
 | Xondamir | Qt Lead | Main window, navigation, Admin panel, Course screens |
 | Nodir | Qt Dev | Login screen, Grade entry, Student dashboard |
+| Rushana | C++ + Presenter | presentation slides, Qt login interface |
 | Malika | C++ + Presenter | presentation slides |
-| Rushana | C++ + Presenter | presentation slides |
 
 ---
 
