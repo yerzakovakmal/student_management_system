@@ -1,52 +1,33 @@
 #pragma once
-#include <iostream>
-#include <string>
+#include "User.h"
 #include <vector>
-#include <sstream>
-#include <iomanip>
-#include "user.h"
-#include "course.h"
-#include "grade.h"
-#include "exceptions.h"
-using namespace std;
 
-class Course;
-class Assignment;
-class Student : virtual public User{
-    private:
-        double gpa;
-        vector<Course*> enrolledCourses;
-        vector<Grade> grades;
-        int semester;
+class Student : public User {
+private:
+    vector<string> enrolledCourses; // course IDs
+    vector<double> grades; // one grade per course (0-100)
+    double gpa;
 
-    public:
-        Student(string name = "UNKNOWN", string email = "unknown@example.com", string password = "password");
-        ~Student() override;
+public:
+    Student(string name, string email, string password);
 
+    // Constructor used when loading from binary (ID already known)
+    Student(string userId, string name, string email, string password);
+    ~Student();
 
-        //getters
-        double getGPA() const;
-        vector<Course*> getEnrolledCourses() const;
-        vector<Grade> getGrades() const;
-        int getCourseCount() const;
+    vector<string> getCourses() const;
+    vector<double> getGrades() const;
+    double getGPA() const;
 
-        //enrollment
-        void enrollCourse(Course& course);
-        void dropCourse(Course& course);
-        bool isEnrolledIn(Course& course) const;
+    void enrollCourse(string courseId);
+    void addGrade(double score); // validated: 0-100
+    void recalcGPA();
 
-        //academic
-        double calculateGPA();
-        void receiveGrade(Course& course, double score);
-        void submitAssignment(Assignment& assignment);
-        void viewGrades() const;
-        string viewTranscript() const;
+    // Binary file I/O
+    void saveToFile() const; // saves to students.dat (append)
+    void writeToBinaryFull(ofstream& out) const;
+    void readFromBinaryFull(ifstream& in);
 
-        //operator overloading
-        friend ostream& operator<<(ostream& out, const Student& c);
-        bool operator==(const Student& other) const;
-        bool operator!=(const Student& other) const;
-
-        string getRole() const override;
-        void displayInfo() const override;
+    void displayPanel() override;
+    string getRole() const override;
 };

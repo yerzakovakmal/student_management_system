@@ -1,105 +1,66 @@
-﻿// User.cpp — implementation
-#include "../include/user.h"
+#include "../include/User.h"
+using namespace std;
 
-// Static member definitions ─
 int User::totalUsers = 0;
 
-//constructor
-User::User(string name, string email, string password, string role, string userId)
-    : name(name), email(email), password(password), role(role), userId(userId)
-{
-    if (name.empty() || email.empty())
-        throw invalid_argument("Name and email cannot be empty");
-    if (password.length() < 6)
-        throw invalid_argument("Password must be at least 6 chars");
+// ── helpers for length-prefixed string binary I/O ─────────────────────────
+static void writeStr(ofstream& out, const string& s) {
+    int len = (int)s.size();
+    out.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    out.write(s.c_str(), len);
+}
+static void readStr(ifstream& in, string& s) {
+    int len = 0;
+    in.read(reinterpret_cast<char*>(&len), sizeof(len));
+    s.resize(len);
+    in.read(&s[0], len);
+}
+
+User::User(string id, string name, string email, string password)
+    : userId(id), name(name), email(email), password(password) {
     totalUsers++;
+    cout << "[User] '" << name << "' (ID: " << userId
+         << ") created. Total users: " << totalUsers << endl;
 }
 
-//Destructor
 User::~User() {
-    --totalUsers;   // keep the count accurate
+    totalUsers--;
 }
 
-//Getters
-string User::getName() const{
-    return name;
-}
-string User::getEmail() const{
-    return email;
-}
-string User::getUserId() const{
-    return userId;
+string User::getUserId() const { return userId; }
+string User::getName()   const { return name;   }
+string User::getEmail()  const { return email;  }
+
+bool User::checkPassword(string input) const {
+    return password == input;
 }
 
-string User::getRole() const{
-    return role;
-}
-
-//Setters
-void User::setName(string newName) {
-    if (newName.empty())
-        throw invalid_argument("Name cannot be empty");
-    name = newName;
-}
-
-void User::setEmail(string newEmail) {
-    if (newEmail.find('@') == string::npos)
-        throw invalid_argument("Invalid email format");
-    email = newEmail;
-}
-
-// Common methods
-bool User::login(string inputEmail, string inputPassword) {
-    if (email == inputEmail && password == inputPassword) {
-        cout << "Login successful. Welcome, " << name << "!" << endl;
-        return true;
-    }
-    throw runtime_error("Invalid email or password");
-    return false;
-}
-
-void User::logout() {
-    cout << name << " has logged out." << endl;
-}
-
-void User::updateProfile(string newName, string newEmail) {
-    setName(newName);    // reuse setters (with validation)
-    setEmail(newEmail);
-    cout << "Profile updated successfully." << endl;
-}
-
-void User::changePassword(string oldPass, string newPass) {
-    if (password != oldPass)
-        throw runtime_error("Current password is incorrect");
-    if (newPass.length() < 6)
-        throw invalid_argument("New password too short");
-    if (newPass == oldPass)
-        throw invalid_argument("New password must differ from old");
-    password = newPass;
-    cout << "Password changed successfully.\n";
-}
-
-//Static methods
-int User::getTotalUsers(){
-    return totalUsers;
-}
-void User::resetUserCount(){ 
-    totalUsers = 0;
-}
-
-//Operator overloads
 bool User::operator==(const User& other) const {
-    return userId == other.userId;//unique ID = identity
-}
-
-bool User::operator!=(const User& other) const {
-    return !(*this == other);//reuse operator==
+    return userId == other.userId;
 }
 
 ostream& operator<<(ostream& out, const User& u) {
-    out << "[" << u.role << "] "
-        << u.name << " <"
-        << u.email << ">"
-        << " #" << u.userId;
+    out << "[" << u.getRole() << "] "
+        << u.name << " | ID: " << u.userId
+        << " | Email: " << u.email;
     return out;
+}
+
+int User::getTotalUsers() {
+    return totalUsers;
+}
+
+// Writes the 4 common fields; subclasses call this then append their own
+void User::writeToBinary(ofstream& out) const {
+    writeStr(out, userId);
+    writeStr(out, name);
+    writeStr(out, email);
+    writeStr(out, password);
+}
+
+void User::readFromBinary(ifstream& in) {
+    readStr(in, userId);
+    readStr(in, name);
+    readStr(in, email);
+    readStr(in, password);
 }

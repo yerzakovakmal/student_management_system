@@ -1,116 +1,114 @@
-// Professor.cpp — implementation
-#include "../include/professor.h"
-#include "../include/student.h"
-#include "../include/course.h"
-#include "../include/assignment.h"
+#include "../include/Professor.h"
 #include "../include/IDgenerator.h"
+#include "../include/LoginException.h"
 #include <iostream>
-#include <sstream>
+#include <fstream>
 using namespace std;
 
-//constructor 
-Professor::Professor(string name, string email, string password, string dept)
-    : User(name, email, password, "Professor", IDgenerator::ProfessorID()),
-      employeeID(getEmployeeId()), department(dept)
-{
-    if(dept.empty()){
-        throw invalid_argument("Professor department cannot be empty");
-    }
-    cout << "[Professor Created] " << name << " (" << employeeID << ") - Dept: " << dept << endl;
+// ── string binary helpers ─────────────────────────────────────────────────
+static void writeStr(ofstream& out, const string& s) {
+    int len = (int)s.size();
+    out.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    out.write(s.c_str(), len);
 }
+static void readStr(ifstream& in, string& s) {
+    int len = 0;
+    in.read(reinterpret_cast<char*>(&len), sizeof(len));
+    s.resize(len);
+    in.read(&s[0], len);
+}
+
+// ── constructors ──────────────────────────────────────────────────────────
+Professor::Professor(string name, string email, string password, string dept)
+    : User(IDgenerator::generateProfessorID(), name, email, password),
+      department(dept) {
+    cout << "[Professor] '" << name << "' (ID: " << userId
+         << ") created. Dept: " << dept << endl;
+}
+
+// Load-from-file constructor: ID already known
+Professor::Professor(string id, string name, string email,
+                     string password, string dept)
+    : User(id, name, email, password), department(dept) {}
 
 Professor::~Professor() {
-    cout << "[Professor Deleted] " << name << " (" << employeeID << ")\n";
+    cout << "[Professor] '" << name << "' (ID: " << userId << ") destroyed." << endl;
 }
 
-//getters
-string Professor::getEmployeeId() const {
-    return employeeID;
-}
-string Professor::getDepartment() const {
-    return department;
-}
-vector<Course*> Professor::getTaughtCourses() const {
-    return taughtCourses;
-}
+// ── getters ───────────────────────────────────────────────────────────────
+string         Professor::getDepartment() const { return department;      }
+vector<string> Professor::getCourseIds()  const { return taughtCourseIds; }
 
-//setters
-void Professor::setDepartment(string dept) {
-    if (dept.empty())
-        throw invalid_argument("Department cannot be empty");
-    department = dept;
-}
-
-//core Methods
-void Professor::createCourse(Course* course) {
-    if (!course)
-        throw invalid_argument("Course pointer is null");
-    taughtCourses.push_back(course);
-    cout << "Course '" << course->getCourseName()
-         << "' added to professor " << name << "\n";
-}
-
-void Professor::assignGrade(Student& student, Course& course, double score) {
-    if (score < 0.0 || score > 100.0){
-        throw out_of_range("Score must be between 0 and 100");
+void Professor::assignCourse(string courseId) {
+    for (int i = 0; i < (int)taughtCourseIds.size(); i++) {
+        if (taughtCourseIds[i] == courseId) {
+            cout << "[Professor] Already assigned to course " << courseId << endl;
+            return;
+        }
     }
-
-    student.receiveGrade(course, score);
-    cout << "Grade " << score << " assigned to "
-         << student.getName() << "\n";
+    taughtCourseIds.push_back(courseId);
+    cout << "[Professor] " << name << " assigned to course " << courseId << endl;
 }
 
-void Professor::manageRoster(Course& course) {
-    cout << "=== Roster: " << course.getCourseName() << " ===\n";
-    for (auto* s : course.getEnrolledStudents())
-        cout << "  - " << s->getName() << "\n";
-}
+// ── binary file I/O ───────────────────────────────────────────────────────
+void Professor::writeToBinaryFull(ofstream& out) const {
+    User::writeToBinary(out);   // userId, name, email, password
 
-void Professor::postMaterial(string material, Course& course) {
-    course.addMaterial(material);
-    cout << "Material posted to " << course.getCourseName() << "\n";
-}
+    writeStr(out, department);
 
-void Professor::createAssignment(Course& course, string title, string description, string dueDate, double maxScore) {
-    if (maxScore <= 0){
-        throw invalid_argument("Max score must be positive");
+    int count = (int)taughtCourseIds.size();
+    out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+    for (int i = 0; i < count; i++) {
+        writeStr(out, taughtCourseIds[i]);
     }
-    Assignment a(title, dueDate, description, maxScore, &course);
-    course.addAssignment(a);
 }
 
-string Professor::generateReport(Course& course) const {
-    ostringstream out;
-    out << "Report for: " << course.getCourseName() << endl;
-    out << "Students enrolled: " << course.getEnrolledStudents().size() << endl;
+void Professor::readFromBinaryFull(ifstream& in) {
+    User::readFromBinary(in);
 
-    for (auto* s : course.getEnrolledStudents()){
-        out << "  " << s->getName() << " — GPA: " << s->calculateGPA() << endl;
+    readStr(in, department);
+
+    int count = 0;
+    in.read(reinterpret_cast<char*>(&count), sizeof(count));
+    taughtCourseIds.clear();
+    for (int i = 0; i < count; i++) {
+        string c; readStr(in, c);
+        taughtCourseIds.push_back(c);
     }
-
-    return out.str();
 }
 
-// Operator Overloads
-bool Professor::operator==(const Professor& other) const {
-    return employeeID == other.employeeID;
+void Professor::saveToFile() const {
+    ofstream out("professors.dat", ios::binary | ios::app);
+    if (!out.is_open()) {
+        throw FileException("Cannot open professors.dat for writing.");
+    }
+    writeToBinaryFull(out);
+    out.close();
+    cout << "[Professor] Data appended to professors.dat" << endl;
 }
 
-ostream& operator<<(ostream& out, const Professor& p) {
-    out << "Professor[" << p.name << " | Dept: " << p.department << " | ID: " << p.employeeID << "]" << endl;
-    return out;
-}
+// ── panel ─────────────────────────────────────────────────────────────────
+string Professor::getRole() const { return "Professor"; }
 
-// Virtual overrides
-string Professor::getRole() const { 
-    return "Professor";
-}
+void Professor::displayPanel() {
+    int choice = 0;
+    cout << "\n=== Professor Panel  |  " << name
+         << "  |  ID: " << userId
+         << "  |  Dept: " << department << " ===" << endl;
+    cout << "  1. View my assigned courses" << endl;
+    cout << "  0. Logout" << endl;
+    cout << "Choice: ";
+    cin >> choice;
 
-void Professor::displayInfo() const {
-    cout << "=== Professor Info ===" << endl;
-    cout << "Name:       " << name << endl;
-    cout << "Email:      " << email << endl;
-    cout << "Employee ID: " << employeeID << endl;
-    cout << "Department: " << department << endl;
-    cout << "Courses:    " << taughtCourses.size() << endl;
+    if (choice == 1) {
+        cout << "\n--- Assigned Courses ---" << endl;
+        if (taughtCourseIds.empty()) {
+            cout << "  (none assigned yet)" << endl;
+        }
+        for (int i = 0; i < (int)taughtCourseIds.size(); i++) {
+            cout << "  - " << taughtCourseIds[i] << endl;
+        }
+        displayPanel();
+    }
+    // choice 0 falls through — returns to main loop
 }

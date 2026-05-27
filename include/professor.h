@@ -1,43 +1,29 @@
 #pragma once
-#include "user.h"
-#include "course.h"
-#include <iostream>
-#include <string>
+#include "User.h"
 #include <vector>
-#include <stdexcept>
-using namespace std;
 
-class Professor : virtual public User{
-    private: 
-        string employeeID;
-        string department;
-        vector<Course*> taughtCourses;
-    public:
-        Professor(string name = "UNKNOWN", string email = "unknown@example.com", string password = "password", string dept = "UNKNOWN");
-        ~Professor() override;
-        
-        //getters
-        string getEmployeeId() const;
-        string getDepartment() const;
-        vector<Course*> getTaughtCourses() const;
-        
+class Professor : public User {
+private:
+    string department;
+    vector<string> taughtCourseIds;// course IDs assigned by admin
 
-        // setters
-        void createCourse(Course* course);
-        void assignGrade(Student& student, Course& course, double score);
-        void postMaterial(string material, Course& course);
-        void createAssignment(Course& course, string title, string description, string dueDate, double maxScore);
-        void setDepartment(string department);
-        string generateReport(Course& course) const;
-        
-        //new addition
-        void manageRoster(Course& course);
+public:
+    Professor(string name, string email, string password, string department);
 
-        //operator overloads
-        bool operator==(const Professor& other) const;
-        friend ostream& operator<<(ostream& out, const Professor& p);
+    // Constructor used when loading from binary (ID already known)
+    Professor(string userId, string name, string email, string password, string dept);
+    ~Professor();
 
-        //virtual overrides from User
-        string getRole() const override;
-        void displayInfo() const override;
+    string getDepartment() const;
+    vector<string> getCourseIds()  const;
+
+    void assignCourse(string courseId);
+
+    // Binary file I/O
+    void saveToFile() const;
+    void writeToBinaryFull(ofstream& out) const;
+    void readFromBinaryFull(ifstream& in);
+
+    void displayPanel() override;
+    string getRole() const override;
 };

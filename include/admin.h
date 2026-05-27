@@ -1,67 +1,60 @@
 #pragma once
-#include <iostream>
+#include "User.h"
+#include "Student.h"
+#include "Professor.h"
+#include "Course.h"
 #include <vector>
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include "user.h"
-#include "student.h"
-#include "professor.h"
-#include "course.h"
 
-using namespace std;
+class Admin : public User {
+private:
+    vector<Student*> students;
+    vector<Professor*> professors;
+    vector<Course> courses;
 
-class Admin : virtual public User{
-    private:
-        string adminDepartment;
-        vector<string> permissions;
-        static int nextOrderNum;
-        static int enrollmentYear;
-        static string generateID();
+    // ── internal binary persistence 
+    void saveStudents() const;
+    void saveProfessors() const;
+    void saveCourses() const;
 
-    public:
-        Admin(string name = "UNKNOWN", string email = "unknown@example.com", string password = "password", string dept = "UNKNOWN");
-        
-        ~Admin() override;
+    void loadStudents();
+    void loadProfessors();
+    void loadCourses();
 
-        //getters
-        string getAdminDepartment() const;
-        vector<string> getPermissions() const;
+public:
+    Admin(string name, string email, string password);
+    ~Admin();
 
-        //setters
-        void setAdminDepartment(string dept);
+    // ── user management 
+    void createStudent(string name, string email, string password);
+    void createProfessor(string name, string email, string password, string dept);
+    void removeStudent(string userId);
+    void removeProfessor(string userId);
 
-        // permission management
-        bool hasPermission(string perm) const;
-        void addPermission(string perm);
-        void deletePermission(string perm);
+    // Function overloading: find by ID  OR  by name
+    Student* findStudent(string userId)  const;
+    Student* findStudent(string name, bool byName) const;
+    Professor* findProfessor(string userId) const;
+    Professor* findProfessor(string name, bool byName) const;
 
+    // ── course management 
+    void addCourse(string courseId, string name, int credits, int capacity);
+    void removeCourse(string courseId);
+    void assignProfessorToCourse(string profId, string courseId);
+    void enrollStudentInCourse(string studentId, string courseId);
+    void assignGrade(string studentId, string courseId, double score);
 
-        //User creation
-        Student* createStudent(string name, string email, string password);
-        Professor* createProfessor(string name, string email, string password, string dept);
+    // ── view helpers (used by panel) 
+    void viewAllStudents() const;
+    void viewAllProfessors() const;
+    void viewAllCourses() const;
+    void viewCourseDetail(string courseId) const;
 
-        //User management
-        void deleteUser(User*& userPtr);
-        void viewAllStudents(const vector<Student*>& students) const;
-        void viewAllProfessors(const vector<Professor*>& profs) const;
+    // Save a human-readable report to admin_report.txt
+    void saveReport()const;
 
-        Student* findStudentByID(const vector<Student*>& students, string& userId) const;
-        Professor* findProfessorByID(const vector<Professor*>& profs, string& userId) const;
+    // Load all data from disk (called once at startup)
+    void loadAllData();
 
-        //Course management
-        void assignProfessorToCourse(Professor& prof, Course& course);
-        void removeCourse(Course*& coursePtr);
-
-        string generateReport(const vector<Student*>& students, const vector<Professor*>& professors, const vector<Course*>& courses) const;
-
-
-        //Operator Overloading
-        friend ostream& operator<<(ostream& out, const Admin& a);
-        bool operator==(const Admin& other) const;
-        bool operator!=(const Admin& other) const;
-
-        // pure virtual function (User)
-        string getRole() const override;
-        void displayInfo() const override;
+    void displayPanel() override;
+    string getRole() const override;
 };
