@@ -1,58 +1,91 @@
 #include <iostream>
 #include <string>
-#include "include/User.h"
-#include "include/Admin.h"
-#include "include/Student.h"
-#include "include/Professor.h"
+#include "include/user.h"
+#include "include/admin.h"
+#include "include/student.h"
+#include "include/professor.h"
 #include "include/LoginException.h"
 using namespace std;
 
-// Demo accounts -fixed credentials for the grader to use
+// Demo accounts fixed credentials
+Admin adminAcc("Dr. Admin", "admin", "admin");
+Student studentAcc("Ali Karimov", "ali@student.iut.uz", "ali123");
+Professor profAcc("Dr. Nazarov", "naz@student.iut.uz", "naz123",  "Computer Science");
 
-Admin     adminAcc("Dr. Admin",      "admin@uni.edu",  "admin123");
-Student   studentAcc("Ali Karimov",  "ali@uni.edu",    "ali123");
-Professor profAcc("Dr. Nazarov",     "naz@uni.edu",    "naz123",  "Computer Science");
-
-//clear window
+//clear window ANSI escape
 static void clearScreen(){
-    // ANSI escape clears the window of terminal
     cout << "\033[2J\033[H";
 }
 
 // Login: returns a base-class pointer on success, throws on failure
-User* doLogin(int role) {
-    string email, pass;
-    cout << "Email:    "; cin >> email;
+User* doLogin(int role, Admin& admin) {
+    string identifier, pass;
+    cout << "\n--- Login ---" << endl;
+    
+    if (role == 1) cout << "Student ID: ";
+    else if (role == 2) cout << "Professor ID: ";
+    else cout << "Email: ";
+    
+    cin >> identifier;
     cout << "Password: "; cin >> pass;
 
-    if (role == 1 && studentAcc.getEmail()  == email && studentAcc.checkPassword(pass))
-        return &studentAcc;
-    if (role == 2 && profAcc.getEmail()     == email && profAcc.checkPassword(pass))
-        return &profAcc;
-    if (role == 3 && adminAcc.getEmail()    == email && adminAcc.checkPassword(pass))
-        return &adminAcc;
+    if (role == 1) { // Student
+        // Check runtime
+        Student* s = admin.findStudent(identifier);
+        if (s != NULL && s->checkPassword(pass)){
+            return s;
+        }
+        
+        // Check demo account
+        if (studentAcc.getUserId() == identifier && studentAcc.checkPassword(pass)){
+            return &studentAcc;
+        }
+    } 
+    else if (role == 2) { // Professor
+        // Check runtime collection
+        Professor* p = admin.findProfessor(identifier);
+        if (p != NULL && p->checkPassword(pass)){
+            return p;
+        }
+        // Check demo account
+        if (profAcc.getUserId() == identifier && profAcc.checkPassword(pass)) {
+            return &profAcc;
+        }
+    } 
+    else if (role == 3) { // Admin
+        if (adminAcc.getEmail() == identifier && adminAcc.checkPassword(pass))
+            return &adminAcc;
+    }
 
-    throw LoginException("Invalid email or password.");
+    throw LoginException("Invalid ID/Email or password.");
 }
 
 int main() {
     // Admin loads all persisted data at startup
-    adminAcc.loadAllData();
+    try {
+        adminAcc.loadAllData();
+    } catch (exception& e) {
+        cout << "[Warning] Could not load data: " << e.what() << endl;
+    }
 
     bool running = true;
     while (running) {
         clearScreen();
-        cout << "\n=====================================" << endl;
+        cout << "=====================================" << endl;
         cout << "   University Management System      " << endl;
         cout << "=====================================" << endl;
-        cout << "  1. Login as Student"    << endl;
-        cout << "  2. Login as Professor"  << endl;
-        cout << "  3. Login as Admin"      << endl;
-        cout << "  0. Exit"                << endl;
+        cout << "  1. Login as Student" << endl;
+        cout << "  2. Login as Professor" << endl;
+        cout << "  3. Login as Admin" << endl;
+        cout << "  0. Exit" << endl;
         cout << "Choice: ";
 
         int choice = 0;
-        cin >> choice;
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
+        }
 
         if (choice == 0) {
             cout << "Goodbye." << endl;
@@ -65,21 +98,36 @@ int main() {
             continue;
         }
 
-        // try-catch block: only login failure is caught here
+        // try-catch block -> only login failure is caught here
         try {
-            User* current = doLogin(choice);
-            cout << "\nWelcome, " << current->getName()
-                 << "!  Role: " << current->getRole() << endl;
+            User* current = doLogin(choice, adminAcc);
+            cout << "\nWelcome, " << current->getName() << "!  Role: " << current->getRole() << endl;
+            cout << "Press Enter to enter your panel...";
+            cin.ignore(); cin.get();
 
-            // Polymorphic call — each subclass shows its own panel.
-            // Panel returns when the user picks 0 (Logout).
-            current->displayPanel();
+            if (current->getRole() == "Professor") {
+                Professor* profPtr = dynamic_cast<Professor*>(current);
+                if (profPtr != NULL) {
+                    profPtr->displayPanelWithAdmin(adminAcc);
+                }
+            } else if (current->getRole() == "Student") {
+                Student* studPtr = dynamic_cast<Student*>(current);
+                if (studPtr != NULL) {
+                    studPtr->displayPanelWithAdmin(adminAcc);
+                }
+            } else {
+                // Admin
+                current->displayPanel();
+            }
 
             cout << "\nYou have been logged out." << endl;
+            cout << "Press Enter to return to main menu...";
+            cin.get();
 
         } catch (LoginException& le) {
             cout << "\n[Login Failed] " << le.what() << endl;
             cout << "Returning to main menu..." << endl;
+            cin.ignore(); cin.get();
         }
     }
 

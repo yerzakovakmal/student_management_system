@@ -1,9 +1,9 @@
-#include "../include/User.h"
+#include "../include/user.h"
 using namespace std;
 
 int User::totalUsers = 0;
 
-// ── helpers for length-prefixed string binary I/O ─────────────────────────
+// ── helpers for length-prefixed string binary I/O
 static void writeStr(ofstream& out, const string& s) {
     int len = (int)s.size();
     out.write(reinterpret_cast<const char*>(&len), sizeof(len));
@@ -19,17 +19,25 @@ static void readStr(ifstream& in, string& s) {
 User::User(string id, string name, string email, string password)
     : userId(id), name(name), email(email), password(password) {
     totalUsers++;
-    cout << "[User] '" << name << "' (ID: " << userId
-         << ") created. Total users: " << totalUsers << endl;
+    cout << "[User] '" << name << "' (ID: " << userId << ") created. Total users: " << totalUsers << endl;
 }
 
 User::~User() {
     totalUsers--;
 }
 
-string User::getUserId() const { return userId; }
-string User::getName()   const { return name;   }
-string User::getEmail()  const { return email;  }
+string User::getUserId() const{ 
+    return userId;
+}
+string User::getName() const{
+    return name;
+}
+string User::getEmail()  const{
+    return email;
+}
+string User::getPassword() const{
+    return password;
+}
 
 bool User::checkPassword(string input) const {
     return password == input;

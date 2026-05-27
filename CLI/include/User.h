@@ -17,8 +17,9 @@ public:
     virtual ~User();
 
     string getUserId() const;
-    string getName()   const;
-    string getEmail()  const;
+    string getName() const;
+    string getEmail() const;
+    string getPassword() const; // Added for Admin oversight
 
     bool checkPassword(string input) const;
 
@@ -26,7 +27,7 @@ public:
     bool operator==(const User& other) const;
     friend ostream& operator<<(ostream& out, const User& u);
 
-    // Binary file helpers — shared by all subclasses
+    // Binary file — shared by all subclasses
     void writeToBinary(ofstream& out) const;
     void readFromBinary(ifstream& in);
 

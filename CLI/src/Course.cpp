@@ -1,4 +1,4 @@
-#include "../include/Course.h"
+#include "../include/course.h"
 using namespace std;
 
 // ── helpers for writing / reading a length-prefixed string ────────────────
@@ -14,10 +14,10 @@ static void readStr(ifstream& in, string& s) {
     in.read(&s[0], len);
 }
 
-Course::Course() : capacity(30), credits(3) {}
+Course::Course() : capacity(30), credits(3), daysOfWeek("TBD"), timeSlot("TBD") {}
 
-Course::Course(string id, string name, int cred, int cap)
-    : courseId(id), courseName(name), credits(cred), capacity(cap) {}
+Course::Course(string id, string name, int cred, int cap, string days, string time)
+    : courseId(id), courseName(name), credits(cred), capacity(cap), daysOfWeek(days), timeSlot(time) {}
 
 void writeCourseBinary(ofstream& out, const Course& c) {
     writeStr(out, c.courseId);
@@ -25,6 +25,8 @@ void writeCourseBinary(ofstream& out, const Course& c) {
     writeStr(out, c.professorId);
     out.write(reinterpret_cast<const char*>(&c.capacity), sizeof(c.capacity));
     out.write(reinterpret_cast<const char*>(&c.credits),  sizeof(c.credits));
+    writeStr(out, c.daysOfWeek);
+    writeStr(out, c.timeSlot);
 }
 
 void readCourseBinary(ifstream& in, Course& c) {
@@ -33,4 +35,6 @@ void readCourseBinary(ifstream& in, Course& c) {
     readStr(in, c.professorId);
     in.read(reinterpret_cast<char*>(&c.capacity), sizeof(c.capacity));
     in.read(reinterpret_cast<char*>(&c.credits),  sizeof(c.credits));
+    readStr(in, c.daysOfWeek);
+    readStr(in, c.timeSlot);
 }
